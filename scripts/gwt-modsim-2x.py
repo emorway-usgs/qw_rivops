@@ -952,7 +952,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                                   connectiondata=lakeconnectiondata,
                                   perioddata=lakeperioddata,
                                   ntables=1,
-                                  tables=[0, "TAB6", "FILEIN", tab6_filename],
+                                  tables=[0, tab6_filename],
                                   observations=lak_obs,
                                   filename='{}.lak'.format(gwfname)
     )
