@@ -52,42 +52,44 @@ prsity = 0.3   # Porosity
 perlen = 365   # Simulation time ($days$)
 k11 = 10.0     # Horizontal hydraulic conductivity ($m/d$)
 k33 = 2.0      # Vertical hydraulic conductivity ($m/d$)
-Ss  = 1e-6     # Storativity
+Ss = 1e-6      # Storativity
 sy_1 = 0.28    # Specific yield and porosity of layer 1
 sy_2 = 0.30    # Specific yield and porosity of layer 2
 sy_3 = 0.32    # Specific yield and porosity of layer 3
 sy_4 = 0.34    # Specific yield and porosity of layer 4
 surfdep = 0.5  # Land-surface depression ($m$)
-vks  = 0.12    # Saturated hydraulic conductivity of unsaturated zone ($m/d$)
+vks = 0.12     # Saturated hydraulic conductivity of unsaturated zone ($m/d$)
 thtr = 0.05    # Residual water content
 thts = 0.42    # Saturated water content
 thti = 0.15    # Initial water content (unsaturated zone)
-eps  = 7.1     # Brooks-Corey epsilon
+eps = 7.1      # Brooks-Corey epsilon
 al = 2.        # Longitudinal dispersivity ($m$)
 rhob_1 = 1.5   # Bulk density of layer 1 ($g/cm^3$)
 rhob_2 = 1.7   # Bulk density of layer 2 ($g/cm^3$)
 rhob_3 = 1.8   # Bulk density of layer 3 ($g/cm^3$)
 rhob_4 = 1.9   # Bulk density of layer 4 ($g/cm^3$)
-Kd =  0.176    # Distribution coefficient ($cm^3/g$)
+Kd = 0.176    # Distribution coefficient ($cm^3/g$)
+
 
 # #### Additional model input
+
 # Time related
-rng     = pd.date_range(start='10/1/1989', end='10/1/1990')
+rng = pd.date_range(start='10/1/1989', end='10/1/1990')
 numdays = 366
-perlen  = [1] * numdays
-nper    = len(perlen)
-nstp    = [1] * numdays
-tsmult  = [1.] * numdays
+perlen = [1] * numdays
+nper = len(perlen)
+nstp = [1] * numdays
+tsmult = [1.] * numdays
 # Recharge related
 ss_rch = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'rch_support', 'ss_rch_2xmodel.txt'))
 tr_rch = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'rch_support', 'tr_rch_2xmodel.txt'))
 # UZF related
-iuzfbnd = np.loadtxt(os.path.join('..','data','modsim_data','uzf_support','iuzfbnd_2xmodel.txt'))
+iuzfbnd = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'uzf_support', 'iuzfbnd_2xmodel.txt'))
 ha = 0.
 hroot = 0.
 rootact = 0.
-finf_ss  = 0.0001    # 0.1 mm
-pet_ss   = 0.002     # 2.0 mm
+finf_ss = 0.0001    # 0.1 mm
+pet_ss = 0.002     # 2.0 mm
 extdp_ss = 5.4864    # m (18 ft)
 extwc_ss = 0.08
 extdp = extdp_ss
@@ -95,9 +97,9 @@ extwc = extwc_ss
 
 # Transport related
 mixelm = 0   # advection scheme 
-ath1   = al  # horizontal transverse dispersivity
-atv    = al  # vertical transverse dispersivity
-dmcoef = 0.  # molecular diffusion
+ath1 = al  # horizontal transverse dispersivity
+atv = al  # vertical transverse dispersivity
+dmcoef = 1.e-9  # molecular diffusion
 xt3d = [False]
 
 icelltype = 1
@@ -116,35 +118,45 @@ prsity = [poro_1, poro_2, poro_3, poro_4]
 # ## Note: The downstream model will be lower by 151.04 m
 
 # #### Model geometry and Active model domain
-top_orig  = np.loadtxt(os.path.join('..','data','modsim_data','dis_support','top1.txt'))
+
+ibnd1 = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'bas_support', 'ibnd1_2xmodel.txt'))
+ibnd2 = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'bas_support', 'ibnd2_2xmodel.txt'))
+ibnd3 = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'bas_support', 'ibnd3_2xmodel.txt'))
+ibnd4 = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'bas_support', 'ibnd4_2xmodel.txt'))
+ibnda = np.array([ibnd1, ibnd2, ibnd3, ibnd4])
+strt1 = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'bas_support', 'strt_2xmodel.txt'))
+strt = [strt1, strt1, strt1, strt1]
+strt = np.array(strt)
+
+top_orig = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'top1.txt'))
 # To set the bottom elevations for the two new models, determine the 
 # original thicknesses and then apply these thicknesses to the new models
-# Remember that the original model's surface elevations were adjusted upstream
-# of the reservoir.  Also don't forget that the number of columns was reduced from
-# 133 to 125.
-bot1_orig = np.loadtxt(os.path.join('..','data','modsim_data','dis_support','bot1.txt'))
-bot2_orig = np.loadtxt(os.path.join('..','data','modsim_data','dis_support','bot2.txt'))
-bot3_orig = np.loadtxt(os.path.join('..','data','modsim_data','dis_support','bot3.txt'))
-bot4_orig = np.loadtxt(os.path.join('..','data','modsim_data','dis_support','bot4.txt'))
+# Notes: -The original model's surface elevations were adjusted upstream of
+#         the reservoir to facilitate smoother transition to its copy placed
+#         at the downstream end of it.
+#        -The number of columns was reduced from 133 (original published
+#         model) to 125.
+#        -Rows 25-30 (1-based) at the downstream end of the model were not in
+#         the original model but appear there now owing to the placement of
+#         another model at the downstream end.  Because of this, the original
+#         arrays don't have any elevation in these cells and will need some
+#         special handling when setting up the new elevation arrays.
+bot1_orig = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'bot1.txt'))
+bot2_orig = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'bot2.txt'))
+bot3_orig = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'bot3.txt'))
+bot4_orig = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'bot4.txt'))
+
 # Now get the new land surface elevation
-top_2x = np.loadtxt(os.path.join('..','data','modsim_data', 'dis_support','top_2xmodel.txt'))
+top_2x = np.loadtxt(os.path.join('..', 'data', 'modsim_data', 'dis_support', 'top_2xmodel.txt'))
+
 # Next, apply the layer 1 thicknesses to the new land surface elevation.
-bot1_2x = top_2x - (top_orig[:, :125] - bot1_orig[:,: 125])
-bot2_2x = bot1_2x - (bot1_orig[:, :125] - bot2_orig[:, :125])
-bot3_2x = bot2_2x - (bot2_orig[:, :125] - bot3_orig[:, :125])
-bot4_2x = bot3_2x - (bot3_orig[:, :125] - bot4_orig[:, :125])
+bot1_2x = top_2x - np.where(np.logical_and(ibnda[0, :, :] > 0, top_orig[:, :125] == 0), 7, (top_orig[:, :125] - bot1_orig[:, :125]))
+bot2_2x = bot1_2x - np.where(np.logical_and(ibnda[1, :, :] > 0, top_orig[:, :125] == 0), 10, (bot1_orig[:, :125] - bot2_orig[:, :125]))
+bot3_2x = bot2_2x - np.where(np.logical_and(ibnda[2, :, :] > 0, top_orig[:, :125] == 0), 10, (bot2_orig[:, :125] - bot3_orig[:, :125]))
+bot4_2x = bot3_2x - np.where(np.logical_and(ibnda[3, :, :] > 0, top_orig[:, :125] == 0), 10, (bot3_orig[:, :125] - bot4_orig[:, :125]))
 
 botm_upstream_model = [bot1_2x, bot2_2x, bot3_2x, bot4_2x]
 botm_np = np.array(botm_upstream_model)
-
-ibnd1 = np.loadtxt(os.path.join('..','data','modsim_data','bas_support','ibnd1_2xmodel.txt'))
-ibnd2 = np.loadtxt(os.path.join('..','data','modsim_data','bas_support','ibnd2_2xmodel.txt'))
-ibnd3 = np.loadtxt(os.path.join('..','data','modsim_data','bas_support','ibnd3_2xmodel.txt'))
-ibnd4 = np.loadtxt(os.path.join('..','data','modsim_data','bas_support','ibnd4_2xmodel.txt'))
-ibnda = np.array([ibnd1, ibnd2, ibnd3, ibnd4])
-strt1 = np.loadtxt(os.path.join('..','data','modsim_data','bas_support','strt_2xmodel.txt'))
-strt  = [strt1, strt1, strt1, strt1]
-strt  = np.array(strt)
 
 # Set some of the storage parameters
 # if using 1.5 g/cm^3 (layer 1), unit conversion is 100cm x 100cm x 100cm / 1m^3 = 1e6 g/m^3
@@ -152,14 +164,15 @@ rhob_1 = np.ones_like(poro_1) * rhob_1 * 1e6
 rhob_2 = np.ones_like(poro_2) * rhob_2 * 1e6
 rhob_3 = np.ones_like(poro_3) * rhob_3 * 1e6
 rhob_4 = np.ones_like(poro_4) * rhob_4 * 1e6
-rhob   = [rhob_1, rhob_2, rhob_3, rhob_4]
+rhob = [rhob_1, rhob_2, rhob_3, rhob_4]
+
 # Kd: "Distribution coefficient"
 # if using 0.176 cm^3/g, unit conversion is 1m^3 / (100cm x 100cm x 100cm) = 1e-6 m^3/g
-Kd_1   = np.ones_like(poro_1) * Kd * 1e-6
-Kd_2   = np.ones_like(poro_2) * Kd * 1e-6
-Kd_3   = np.ones_like(poro_3) * Kd * 1e-6
-Kd_4   = np.ones_like(poro_4) * Kd * 1e-6
-Kd     = [Kd_1, Kd_2, Kd_3, Kd_4]
+Kd_1 = np.ones_like(poro_1) * Kd * 1e-6
+Kd_2 = np.ones_like(poro_2) * Kd * 1e-6
+Kd_3 = np.ones_like(poro_3) * Kd * 1e-6
+Kd_4 = np.ones_like(poro_4) * Kd * 1e-6
+Kd = [Kd_1, Kd_2, Kd_3, Kd_4]
 
 # Set solver parameter values (and related)
 nouter, ninner = 100, 300              
@@ -233,29 +246,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                                newtonoptions=True,
                                model_nam_file='{}.nam'.format(gwfname)
     )
-    
-    # Instantiating MODFLOW 6 solver for flow model
-    imsgwf = flopy.mf6.ModflowIms(sim,
-                                  print_option="summary",
-                                  outer_dvclose=hclose,
-                                  outer_maximum=2000,
-                                  under_relaxation="cooley",
-                                  linear_acceleration="BICGSTAB",
-                                  under_relaxation_theta=0.3,
-                                  under_relaxation_kappa=0.08,
-                                  under_relaxation_gamma=0.08,
-                                  under_relaxation_momentum=0.01,
-                                  inner_dvclose=1.0e-3,
-                                  rcloserecord=[0.0001, "relative_rclose"],
-                                  inner_maximum=100,
-                                  relaxation_factor=0.0,
-                                  number_orthogonalizations=2,
-                                  preconditioner_levels=8,
-                                  preconditioner_drop_tolerance=0.001,
-                                  filename='{}.ims'.format(gwfname)
-    )
-    sim.register_ims_package(imsgwf, [gwf.name])
-    
+
     # Instantiating MODFLOW 6 discretization package
     flopy.mf6.ModflowGwfdis(gwf,
                             length_units=length_units,
@@ -306,18 +297,26 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                            saverecord=[('HEAD', 'LAST'),
                                        ('BUDGET', 'LAST')],
                            printrecord=[('HEAD', 'LAST'),
-                                        ('BUDGET', 'LAST')]
+                                        ('BUDGET', 'LAST')],
+                           filename='{}.oc'.format(gwfname)
     )
     
     
-    # Instantiating MODFLOW 6 array-based recharge package (with a concentration auxiliary array above)
-    # The RCH package is intended to simulate a small regional groundwater inflow from surrounding lands. Because the modeled area is patterned after an irrigated river valley, surrounding non-irrigated associated with semi-arid to arid regions are not explicitly represented by the model, though they may contribute small amounts of water along the northern and southern perimeter of active model domain. The concentration associated with this regional groundwater inflow has abitrarily been set to a low background concentration.
+    # Instantiating MODFLOW 6 array-based recharge package (with a
+    # concentration auxiliary array above). The RCH package is intended to
+    # simulate a small regional groundwater inflow from surrounding lands.
+    # Because the modeled area is patterned after an irrigated river valley,
+    # surrounding non-irrigated associated with semi-arid to arid regions are
+    # not explicitly represented by the model, though they may contribute small
+    # amounts of water along the northern and southern perimeter of the active
+    # model domain. The concentration associated with this regional groundwater
+    # inflow has arbitrarily been set to a low background concentration.
 
     # Initialize a concentration array by grabbing the starting concentration array values
     # When passing the RCHA constructor, the auxiliary concentration array needs to be 3d w/ 1 layer.
     strta, rch_conc = starting_conc(gwf)
     irch = {0: 3, 1: 3}
-    recharge = {0: ss_rch, 1:tr_rch}
+    recharge = {0: ss_rch, 1: tr_rch}
     rchc = {0: rch_conc, 1: rch_conc}
     
     flopy.mf6.ModflowGwfrcha(gwf, 
@@ -343,7 +342,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     # infiltration and groundwater discharge to land surface to the surface 
     # water system will be handled by the MVR package. The auxiliary variable,
     # which is concentration, is entered as 0.0 and is present for the sake of
-    # model input mechanics.  Because groundwater is discharging, the MODFLOW 6 
+    # model input mechanics.  Because groundwater is discharging, the MODFLOW 6
     # code will assign the calculated concentration of the groundwater to the 
     # groundwater discharge.
     #
@@ -355,13 +354,13 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     
     drn_spd  = []
     drn_dict = {}
-    cond     = 10000  # Use an arbitrarily high conductance term to avoid impeding groundwater discharge
-    ddrn     = -0.5   # See definition of auxdepthname in drain package documentation to learn more about this parameter
-    idrnno   = 0
+    cond = 38400  # Use an arbitrarily high conductance term to avoid impeding groundwater discharge
+    ddrn = -0.5   # See definition of auxdepthname in drain package documentation to learn more about this parameter
+    idrnno = 0
     for i in np.arange(0, top_2x.shape[0]):
         for j in np.arange(0, top_2x.shape[1]):
             if ibnda[0, i, j]:
-                drn_spd.append([(0, i, j), top_2x[i, j], cond, ddrn, 0.0])  #  last value is the concentration
+                drn_spd.append([(0, i, j), top_2x[i, j] - elev_adj, cond, ddrn, 0.0])  #  last value is the concentration
                 # append dictionary of drain indices
                 drn_dict.update({(i, j): idrnno})
                 idrnno += 1
@@ -388,16 +387,23 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     # * Mover Package
     #
     # Instantiating MODFLOW 6 unsatruated-zone flow package
-    # The datasets relied upon to create the UZF input are from the original UZF input file for MF-NWT. As such, 1 year's worth of pET arrays were peeled out of the original UZF input file and stored as 2D arrays, 1 file per day. The pET information varies cell-by-cell and is based on an annually varying cropping pattern, with 5 different crop types. I believe the original publication contains more information about the pET values. Precipitation data also was stored in the original UZF input file, and these values will be entered here as well.
-    # Fill 3D numpy array with every cell's total uz storage (used for post-processing later)
+    # The datasets relied upon to create the UZF input are from the original
+    # UZF input file for MF-NWT. As such, 1 year's worth of pET arrays were
+    # peeled out of the original UZF input file and stored as 2D arrays, 1
+    # file per day. The pET information varies cell-by-cell and is based on an
+    # annually varying cropping pattern, with 5 different crop types. I
+    # believe the original publication contains more information about the pET
+    # values. Precipitation data also was stored in the original UZF input
+    # file, and these values will be entered here as well. Fill 3D numpy array
+    # with every cell's total uz storage (used for post-processing later)
     uzMaxStor = np.zeros_like(ibnda)
     cell_area = delr * delc
-    uz_voids  = (thts - thtr)
+    uz_voids = (thts - thtr)
     for k in np.arange(uzMaxStor.shape[0]):
         for i in np.arange(uzMaxStor.shape[1]):
             for j in np.arange(uzMaxStor.shape[2]):
                 if ibnda[k, i, j] > 0:
-                    if k==0:
+                    if k == 0:
                         cel_thkness = (top_2x[i, j] - elev_adj) - (botm_np[0, i, j] - elev_adj)
                     else:
                         cel_thkness = (botm_np[k-1, i, j] - elev_adj) - (botm_np[k, i, j] - elev_adj)
@@ -406,16 +412,16 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     # UZF Boundname support 
     # ----------------------
     fl = os.path.join('..', 'data', 'modsim_data', 'sfr_support')
-    sfr2uzf = pd.read_csv(os.path.join(fl,'sfr_2_uzf_conns.csv'), header=0)
+    sfr2uzf = pd.read_csv(os.path.join(fl, 'sfr_2_uzf_conns.csv'), header=0)
     
     uzf_packagedata = []
-    pd0             = []
-    iuzno           = 0
-    surfdep         = 0.5
+    pd0 = []
+    iuzno = 0
+    surfdep = 0.5
     # Set up the UZF static variables
     for k in range(nlay):
         for i in range(0, iuzfbnd.shape[0]):
-            for j in range(0,iuzfbnd.shape[1]):
+            for j in range(0, iuzfbnd.shape[1]):
                 if iuzfbnd[i, j] != 0:                           # even though ibnd = 1 below the reservoir, need to ignore
                     if k == 0:                                   # all cells below a lake, hence ibnda[0,i,j]
                         lflag = 1
@@ -427,8 +433,8 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                         surfdep = 0.0
                     
                     # Set the vertical connection, which is the cell below
-                    ivertcon =  iuzno + int(iuzfbnd.sum())
-                    if k == nlay - 1: ivertcon = -1       # adjust if on bottom layer (no underlying conn.)
+                    ivertcon = iuzno + int(iuzfbnd.sum())
+                    if k == nlay-1: ivertcon = -1         # adjust if on bottom layer (no underlying conn.)
                                                           # Keep in mind 0-based adjustment (so ivertcon==-1 -> 0)
                     
                     # Set the boundname for the land surface cells
@@ -439,13 +445,13 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                         except:
                             cmd_area = []
                         
-                        if cmd_area==1:
+                        if cmd_area == 1:
                             bndnm = 'CA1'
-                        elif cmd_area==2:
+                        elif cmd_area == 2:
                             bndnm = 'CA2'
-                        elif cmd_area==3:
+                        elif cmd_area == 3:
                             bndnm = 'CA3'
-                        elif cmd_area==4:
+                        elif cmd_area == 4:
                             bndnm = 'CA4'
                         else:
                             bndnm = 'NatVeg'
@@ -493,7 +499,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
         
         # For each active uzf cell, set the boundary values
         iuzno = 0
-        pdx   = []
+        pdx = []
         for i in range(0, iuzfbnd.shape[0]):
             for j in range(0,iuzfbnd.shape[1]):
                 if iuzfbnd[i,j] != 0:
@@ -554,24 +560,54 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     
     
     # Instantiating MODFLOW 6 streamflow routing package 
-    # Use of a few externally defined functions aid this part of the model generation. The motivation for using an external script is to limit the amount of script appearing here, since these auxillary functions contains SFR information (roughly the first ~800 lines of the imported script) from the original MF-NWT formatted SFR input file and some hacky non-flopy related script that simply help transfer data from the original SFR input file to the new MF6 format.
+    # Use of a few externally defined functions aid this part of the model
+    # generation. The motivation for using an external script is to limit the
+    # amount of script appearing here, since these auxillary functions
+    # contains SFR information (roughly the first ~800 lines of the imported
+    # script) from the original MF-NWT formatted SFR input file and some hacky
+    # non-flopy related script that simply help transfer data from the
+    # original SFR input file to the new MF6 format.
     # 
-    # SFR-to-SFR diversions area handled within the SFR package, and not with MVR, since this water is staying within the package.  In order to test out the different diversion types, all 4 cprior options are exercised as noted in the comments below.  _cprior_ options include:
-    # * FRACTION - the amount of the diversion is computed as a fraction of the streamflow leaving reach RNO
-    # * EXCESS - a diversion is made only if QDS for reach RNO exceeds the value of DIVFLOW. If this occurs, then the quantity of water diverted is the excess flow (Qds-DIVFLOW) and Qds from reach RNO is set equal to DIVFLOW
-    # * THRESHOLD - if QDS in reach RNO is less than the specified diversion flow (DIVFLOW), no water is diverted from reach RNO. If QDS in reach RNO is greater than or equal to (DIVFLOW), (DIVFLOW) is diverted and QDS is set to the remainder (QDS DIVFLOW)).
-    # * UPTO - if QDS in reach RNO is greater than or equal to the specified diversion flow (DIVFLOW), QDS is reduced by DIVFLOW. If QDS in reach RNO is less than (DIVFLOW), DIVFLOW is set to QDS and there will be no flow available for reaches connected to downstream end of reach RNO.
+    # SFR-to-SFR diversions area handled within the SFR package, and not with
+    # MVR, since this water is staying within the package.  In order to test
+    # out the different diversion types, all 4 cprior options are exercised as
+    # noted in the comments below.  _cprior_ options include:
+    # * FRACTION - the amount of the diversion is computed as a fraction of
+    #              the streamflow leaving reach RNO
+    # * EXCESS - a diversion is made only if QDS for reach RNO exceeds the
+    #            value of DIVFLOW. If this occurs, then the quantity of water
+    #            diverted is the excess flow (Qds-DIVFLOW) and Qds from reach
+    #            RNO is set equal to DIVFLOW
+    # * THRESHOLD - if QDS in reach RNO is less than the specified diversion
+    #               flow (DIVFLOW), no water is diverted from reach RNO. If
+    #               QDS in reach RNO is greater than or equal to (DIVFLOW),
+    #               (DIVFLOW) is diverted and QDS is set to the remainder
+    #               (QDS DIVFLOW)).
+    # * UPTO - if QDS in reach RNO is greater than or equal to the specified
+    #          diversion flow (DIVFLOW), QDS is reduced by DIVFLOW. If QDS in
+    #          reach RNO is less than (DIVFLOW), DIVFLOW is set to QDS and
+    #          there will be no flow available for reaches connected to
+    #          downstream end of reach RNO.
     # 
-    # Continuous time series of TDS concentrations were pulled from two sites in Colorado's Arkansas River Valley for plugging into SFT package below. These concentrations are for a site on the mainstem of the Arkansas River located in SE Colorado and one of its tributaries.  A USGS report by [Miller et al. (2010); Table 3](https://pubs.usgs.gov/sir/2010/5069/pdf/SIR10-5069.pdf) provides site-specific equations to convert the continuously values in units of microsiemens per centimeter at 25 degrees Celsius ($\mu$S/cm) to mg/L.  The site specific equations are for the Arkansas River at Avondale and Purgatoire River near Las Animas sites, and respectively represent:
+    # Continuous time series of TDS concentrations were pulled from two sites
+    # in Colorado's Arkansas River Valley for plugging into SFT package below.
+    # These concentrations are for a site on the mainstem of the Arkansas
+    # River located in SE Colorado and one of its tributaries.  A USGS report
+    # by [Miller et al. (2010); Table 3](https://pubs.usgs.gov/sir/2010/5069/pdf/SIR10-5069.pdf)
+    # provides site-specific equations to convert the continuously values in
+    # units of microsiemens per centimeter at 25 degrees Celsius ($\mu$S/cm)
+    # to mg/L.  The site specific equations are for the Arkansas River at
+    # Avondale and Purgatoire River near Las Animas sites, and respectively
+    # represent:
     # * Main Model Inflow: $DS = 0.793SC - 89.256$
     # * Tributary Inflow: $DS = 1.033SC - 420.487$
     # where SC is the recorded concentration in $\mu$S/cm and DS is the concentration in mg/L.
     
     # Call functions defined within the imported script
-    conns        = modsimBld.gen_mf6_sfr_connections()  
-    ndvs, ustrf  = modsimBld.tally_ndvs(conns)
+    conns = modsimBld.gen_mf6_sfr_connections()
+    ndvs, ustrf = modsimBld.tally_ndvs(conns)
     divs, cprior = modsimBld.define_divs_dat(ndvs)
-    pkdat        = modsimBld.gen_sfrpkdata(conns, ndvs, ustrf) 
+    pkdat = modsimBld.gen_sfrpkdata(conns, ndvs, ustrf)
     
     # For the stress period data, refer to the time series
     # reachs with inflow are 1, the main inflow, and 556, the tributary inflow
@@ -664,7 +700,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     sfr_obs = {'{}.sfrobs'.format(gwfname): [('main_in',         'downstream-flow',  1),  # For now, these need to be 1-based
                                              ('res_in',          'downstream-flow', 20),
                                              ('resRelease',      'upstream-flow',   21),
-                                             ('resSpill',        'downstream-flow',743),
+                                             ('resSpill',        'downstream-flow',733),
                                              ('priorDiv1',       'sfr',             21),
                                              ('AgArea1_div',     'upstream-flow',   22),
                                              ('AgArea1_lat1',    'upstream-flow',   47),
@@ -691,7 +727,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                                              ('AgArea4_lat4',    'upstream-flow',  555),
                                              ('postag4_lat4',    'upstream-flow',  719),
                                              ('minInstrmQ',      'upstream-flow',  677),
-                                             ('modeloutlet',     'downstream-flow',742), 
+                                             ('modeloutlet',     'downstream-flow',732),
                                              ('AgArea3_preLat1', 'upstream-flow',  320),
                                              ('AgArea3_preLat2', 'upstream-flow',  341),
                                              ('AgArea3_preLat3', 'upstream-flow',  357),
@@ -824,8 +860,8 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     )
     
     # Pull in the time series of flow entering the model on the mainstem
-    fname1 = os.path.join('..','data','modsim_data','sfr_support','Model_Inflow_Q_wConc.txt')
-    fname2 = os.path.join('..','data','modsim_data','sfr_support','Tributary_Q_wConc.txt')
+    fname1 = os.path.join('..', 'data', 'modsim_data', 'sfr_support', 'Model_Inflow_Q_wConc.txt')
+    fname2 = os.path.join('..', 'data', 'modsim_data', 'sfr_support', 'Tributary_Q_wConc.txt')
     
 
     # This grabs two time series simultaneously
@@ -845,8 +881,8 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     
     sfr.ts.initialize(filename=gwfname + '_sfr_inflows.ts', 
                       timeseries=sfr_ts_in,
-                      time_series_namerecord=['main','trib'],
-                      interpolation_methodrecord=['stepwise','stepwise'])
+                      time_series_namerecord=['main', 'trib'],
+                      interpolation_methodrecord=['stepwise', 'stepwise'])
 
 
     # Instantiating MODFLOW 6 lake package
@@ -1024,7 +1060,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     static_mvrperioddata = [     # don't forget to use 0-based
                             ('SFR-1', 19, 'RES-1',   0, 'FACTOR',  1.), # Connection is fixed and won't change (reservoir inflow)
                             ('RES-1',  0, 'SFR-1',  20, 'FACTOR',  1.), # Managed release outlet (1 of 2)
-                            ('RES-1',  1, 'SFR-1', 742, 'FACTOR',  1.), # Spillway outlet (2 of 2)
+                            ('RES-1',  1, 'SFR-1', 732, 'FACTOR',  1.)  # Spillway outlet (2 of 2)
                            ]
     
     # Set up all potential UZF -> SFR and UZF -> LAK connections (runoff)
@@ -1034,7 +1070,7 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
     irunbnd = modsimBld.determine_runoff_conns_4mvr(pth)  # at this point, irunbnd is 1-based, compensate below
     
     iuzno = 0
-    k     = 0             # Hard-wire the layer no.
+    k = 0             # Hard-wire the layer no.
     for i in range(0, iuzfbnd.shape[0]):
         for j in range(0,iuzfbnd.shape[1]):
             if (i, j) in iuzno_cell_dict:
@@ -1075,11 +1111,21 @@ def build_gwf_model(sim, i, elev_adj, silent=False):
                             filename='{}.mvr'.format(gwfname)
     )
     
-    # Instantiating the MODFLOW 6 basic well package (with a concentration auxiliary variable)
-    # The WEL package uses the MVR package to deliver pumped water to UZF for irrigation, making this model representative of a conjunctive use system. Thus, pumping represents supplemental groundwater pumping where surface-water delivery shortfalls occur.  Instatiation of the WEL package comes after MVR, since it is the code associated with MVR that establishes how much water to pump.  In other words, only after running the script associated with the MVR connections do we know how much to pump from each well for each daily stress period. 
+    # Instantiating the MODFLOW 6 basic well package (with a concentration
+    # auxiliary variable). The WEL package uses the MVR package to deliver
+    # pumped water to UZF for irrigation, making this model representative
+    # of a conjunctive use system. Thus, pumping represents supplemental
+    # groundwater pumping where surface-water delivery shortfalls occur.
+    # Instatiation of the WEL package comes after MVR, since it is the code
+    # associated with MVR that establishes how much water to pump.  In other
+    # words, only after running the script associated with the MVR connections
+    # do we know how much to pump from each well for each daily stress period.
     #
-    # The concentration of the pumped water will be determined by the model once it calculates the groundwater concentrations.  Nevertheless, entering a dummy time series for concentration that consists of zeros.
-    # Need to cycle through the WEL data returned by the mvr preparation script and get it into a form acceptable to ModflowGwfwel class
+    # The concentration of the pumped water will be determined by the model
+    # once it calculates the groundwater concentrations.  Nevertheless,
+    # entering a dummy time series for concentration that consists of zeros.
+    # Need to cycle through the WEL data returned by the mvr preparation
+    # script and get it into a form acceptable to ModflowGwfwel class:
     stress_period_data = {}
     for key, values in wel_spd.items():
         cur_period = flopy.mf6.ModflowGwfwel.stress_period_data.empty(gwf, 
@@ -1123,29 +1169,13 @@ def build_gwt_model(sim, i, objs4gwt, elev_adj, silent=False):
     
     # Instantiating MODFLOW 6 groundwater transport package
     gwtname = 'gwt_' + example_name + '_' + str(i + 1)
-    gwt = flopy.mf6.MFModel(sim,
-                            model_type='gwt6',
-                            modelname=gwtname,
-                            model_nam_file='{}.nam'.format(gwtname))
-    gwt.name_file.save_flows = True
-    
-    # create iterative model solution and register the gwt model with it  
-    imsgwt = flopy.mf6.ModflowIms(sim,
-                                  print_option='SUMMARY',
-                                  outer_dvclose=hclose,
-                                  outer_maximum=nouter,
-                                  under_relaxation='NONE',
-                                  inner_maximum=ninner,
-                                  inner_dvclose=hclose, 
-                                  rcloserecord=rclose,
-                                  linear_acceleration='BICGSTAB',
-                                  scaling_method='NONE',
-                                  reordering_method='NONE',
-                                  relaxation_factor=relax,
-                                  filename='{}.ims'.format(gwtname)
+    gwt = flopy.mf6.ModflowGwt(
+        sim,
+        modelname=gwtname,
+        model_nam_file='{}.nam'.format(gwtname)
     )
-    sim.register_ims_package(imsgwt, [gwt.name])
-    
+    gwt.name_file.save_flows = True
+
     # Instantiating MODFLOW 6 transport discretization package
     flopy.mf6.ModflowGwtdis(gwt, 
                             nlay=nlay,
@@ -1219,7 +1249,8 @@ def build_gwt_model(sim, i, objs4gwt, elev_adj, silent=False):
                            saverecord=[('CONCENTRATION', 'LAST'),
                                        ('BUDGET', 'LAST')],
                            printrecord=[('CONCENTRATION', 'LAST'),
-                                        ('BUDGET', 'LAST')]
+                                        ('BUDGET', 'LAST')],
+                           filename='{}.oc'.format(gwtname)
     )
 
     # Start of Advanced Transport Package Instantiations
@@ -1271,7 +1302,7 @@ def build_gwt_model(sim, i, objs4gwt, elev_adj, silent=False):
     sft_obs = {(gwtname + '.sftobs', ): [('main_in',         'concentration',   1),  # For now, these need to be 1-based
                                          ('res_in',          'concentration',  20),
                                          ('resRelease',      'concentration',  21),
-                                         ('resSpill',        'concentration', 743),
+                                         ('resSpill',        'concentration', 733),
                                          ('priorDiv1',       'concentration',  21),
                                          ('AgArea1_div',     'concentration',  22),
                                          ('AgArea1_lat1',    'concentration',  47),
@@ -1298,7 +1329,7 @@ def build_gwt_model(sim, i, objs4gwt, elev_adj, silent=False):
                                          ('AgArea4_lat4',    'concentration', 555),
                                          ('postag4_lat4',    'concentration', 719),
                                          ('minInstrmQ',      'concentration', 677),
-                                         ('modeloutlet',     'concentration', 742), 
+                                         ('modeloutlet',     'concentration', 732),
                                          ('AgArea3_preLat1', 'concentration', 320),
                                          ('AgArea3_preLat2', 'concentration', 341),
                                          ('AgArea3_preLat3', 'concentration', 357),
@@ -1371,12 +1402,13 @@ def build_gwt_model(sim, i, objs4gwt, elev_adj, silent=False):
 
 def setup_gwfgwt_exchng(sim, gwfname, gwtname, i):
     # Instantiating MODFLOW 6 flow-transport exchange mechanism
-    flopy.mf6.ModflowGwfgwt(sim,
-                            exgtype='GWF6-GWT6',
-                            exgmnamea=gwfname,
-                            exgmnameb=gwtname,
-                            filename='{}.gwfgwt'.format(gwfname)
-                            )
+    flopy.mf6.ModflowGwfgwt(
+        sim,
+        exgtype='GWF6-GWT6',
+        exgmnamea=gwfname,
+        exgmnameb=gwtname,
+        filename='{}.gwfgwt'.format(gwfname)
+    )
 
 
 # ## Function to build models
@@ -1386,22 +1418,25 @@ def build_simulation(sim_name, elev_adj, silent=False):
         
         # MODFLOW 6
         sim_ws = os.path.join(ws, sim_name)
-        sim = flopy.mf6.MFSimulation(sim_name=sim_name,
-                                     version='mf6',
-                                     sim_ws=sim_ws, 
-                                     exe_name=mf6exe,
-                                     memory_print_option="ALL",
-                                     continue_=False
+        sim = flopy.mf6.MFSimulation(
+            sim_name=sim_name,
+            version='mf6',
+            sim_ws=sim_ws,
+            exe_name=mf6exe,
+            memory_print_option="ALL",
+            continue_=False
         )
         
         # Instantiating MODFLOW 6 time discretization
         tdis_rc = []
         for i in range(len(rng)):
             tdis_rc.append((perlen[i], nstp[i], tsmult[i]))
-        flopy.mf6.ModflowTdis(sim, 
-                              nper=nper, 
-                              perioddata=tdis_rc, 
-                              time_units=time_units
+        flopy.mf6.ModflowTdis(
+            sim,
+            nper=nper,
+            perioddata=tdis_rc,
+            time_units=time_units,
+            filename='{}.tdis'.format(sim_name)
         )
         
         # Setting up two versions of the same model, one downstream of the other
@@ -1410,6 +1445,7 @@ def build_simulation(sim_name, elev_adj, silent=False):
         for i, itm in enumerate(elev_adj):
             gwfname, objs4gwt = build_gwf_model(sim, i, elev_adj=itm, silent=False)
             gwtname = build_gwt_model(sim, i, objs4gwt, elev_adj=itm, silent=False)
+
             # Establish flow-transport exchange
             setup_gwfgwt_exchng(sim, gwfname, gwtname, i)
 
@@ -1420,7 +1456,51 @@ def build_simulation(sim_name, elev_adj, silent=False):
             # Establish transport-transport exchange: Collect the gwt names in a list
             if gwtname not in gwt_model_names:
                 gwt_model_names.append(gwtname)
-        
+
+
+        # Instantiating MODFLOW 6 solver for all GWT models
+        # create iterative model solution and register the gwt model with it
+        imsgwf = flopy.mf6.ModflowIms(
+            sim,
+            print_option="summary",
+            outer_dvclose=hclose,
+            outer_maximum=2000,
+            under_relaxation="cooley",
+            linear_acceleration="BICGSTAB",
+            under_relaxation_theta=0.3,
+            under_relaxation_kappa=0.08,
+            under_relaxation_gamma=0.08,
+            under_relaxation_momentum=0.01,
+            inner_dvclose=1.0e-3,
+            rcloserecord=[0.0001, "relative_rclose"],
+            inner_maximum=100,
+            relaxation_factor=0.0,
+            number_orthogonalizations=2,
+            preconditioner_levels=8,
+            preconditioner_drop_tolerance=0.001,
+            filename='{}.ims'.format(sim_name)
+        )
+        sim.register_ims_package(imsgwf, gwf_model_names)
+
+        # Instantiating MODFLOW 6 solver for all GWT models
+        # create iterative model solution and register the gwt model with it
+        imsgwt = flopy.mf6.ModflowIms(
+            sim,
+            print_option='SUMMARY',
+            outer_dvclose=hclose,
+            outer_maximum=nouter,
+            under_relaxation='NONE',
+            inner_maximum=ninner,
+            inner_dvclose=hclose,
+            rcloserecord=rclose,
+            linear_acceleration='BICGSTAB',
+            scaling_method='NONE',
+            reordering_method='NONE',
+            relaxation_factor=relax,
+            filename='{}.ims'.format(gwtname)
+        )
+        sim.register_ims_package(imsgwt, gwt_model_names)
+
         # After all the models are created, connect gwf to gwf and gwt to gwt
         # Start by setting up exchange data
         gwf_model1 = sim.get_model(gwf_model_names[0])
@@ -1432,34 +1512,54 @@ def build_simulation(sim_name, elev_adj, silent=False):
 
         # Matchup the downstream (right) edge of the upstream model with the
         # upstream (left) edge of the downstream model
-        j=0
+        j = 0
         exchng_conn = []
-        ihc = 1
+        ihc = 2
         cl1 = 200
         cl2 = 200
         hwva = 400
+        angldegx = 0.
         for k in range(idom1_dat.shape[0]):
             for i in range(idom1_dat.shape[1]):
-                #        upstream model                downstream model
-                #        --------------                ----------------
-                if idom1_dat[k, i, j - 1] != 0 and idom2_dat[k, i, -j] != 0:
-                    exchng_conn.append(((k, i, ncol - 1), (k, i, j), ihc, cl1, cl2, hwva))
+                if ibnda[k, i, -1]:
+                    # Because cdist needs to account for the vertical component in
+                    # addition to the horizontal component, need to use pythagorean
+                    # theorem
+                    if k == 0:
+                        node1_elv = (top_2x[i, -1] + botm_np[k, i, -1]) / 2
+                        neighboring_node_elv = ((top_2x[i, 0] - elev_adj[1]) + (botm_np[k, i, 0] - elev_adj[1])) / 2
+                    elif k > 0:
+                        node1_elv = ((botm_np[k, i, -1] - elev_adj[0]) + (botm_np[k, i, -1] - elev_adj[0])) / 2
+                        neighboring_node_elv = ((botm_np[k, i, 0] - elev_adj[1]) + (botm_np[k, i, 0] - elev_adj[1])) / 2
+                    
 
-        gwfgwf = flopy.mf6.ModflowGwfgwf(sim,
-                                         exgtype='GWF6-GWF6',
-                                         print_flows=True,
-                                         print_input=True,
-                                         exgmnamea=gwf_model_names[0],
-                                         exgmnameb=gwf_model_names[1],
-                                         nexg=len(exchng_conn),
-                                         exchangedata=exchng_conn,
-                                         mvr_filerecord='{}.mvr'.format(sim_name),
-                                         pname='EXG-1',
-                                         filename='{}.exg'.format(sim_name))
+                    vert_dist = node1_elv - neighboring_node_elv
+                    cdist = (vert_dist**2 + 400**2)**0.5
+
+                    #        upstream model                downstream model
+                    #        --------------                ----------------
+                    if idom1_dat[k, i, j - 1] != 0 and idom2_dat[k, i, 0] != 0:
+                        exchng_conn.append(((k, i, ncol - 1), (k, i, j), ihc, cl1, cl2, hwva, angldegx, cdist))
+
 
         # Instantiate model-to-model MVR package (for SFR conn)
+        gwfgwf = flopy.mf6.ModflowGwfgwf(
+            sim,
+            exgtype='GWF6-GWF6',
+            print_flows=True,
+            print_input=True,
+            auxiliary=["ANGLDEGX", "CDIST"],
+            exgmnamea=gwf_model_names[0],
+            exgmnameb=gwf_model_names[1],
+            nexg=len(exchng_conn),
+            exchangedata=exchng_conn,
+            pname='EXG-GWF',
+            filename=f"{gwf_model_names[0]}-{gwf_model_names[1]}.exg"
+        )
+
         mvrpack = [[gwf_model_names[0], 'SFR-1'], [gwf_model_names[1], 'SFR-1']]
         maxpackages = len(mvrpack)
+        mvr_filerecord = f"{gwf_model_names[0]}-{gwf_model_names[1]}.gwfgwf.mvr"
 
         # Set up static SFR-to-SFR connections that remains fixed for entire simulation
         static_mvrperioddata = [  # don't forget to use 0-based values
@@ -1467,15 +1567,35 @@ def build_simulation(sim_name, elev_adj, silent=False):
         ]
 
         mvrspd = {0: static_mvrperioddata}
-        maxmvr = 1
-        mvr = flopy.mf6.ModflowMvr(sim,
-                                   modelnames=True,
-                                   maxmvr=maxmvr,
-                                   print_flows=True,
-                                   maxpackages=maxpackages,
-                                   packages=mvrpack,
-                                   perioddata=mvrspd,
-                                   filename='{}.mvr'.format(sim_name))
+        gwfgwf.mvr.initialize(
+            modelnames=True,
+            maxmvr=len(static_mvrperioddata),
+            print_flows=True,
+            maxpackages=maxpackages,
+            packages=mvrpack,
+            perioddata=mvrspd,
+            filename=mvr_filerecord
+        )
+
+        # Instantiate a GWT-GWT exchange for transport at the boundary
+        gwtgwt = flopy.mf6.ModflowGwtgwt(
+            sim,
+            exgtype='GWT6-GWT6',
+            print_flows=True,
+            print_input=True,
+            auxiliary=["ANGLDEGX", "CDIST"],
+            exgmnamea=gwt_model_names[0],
+            exgmnameb=gwt_model_names[1],
+            gwfmodelname1=gwf_model_names[0],
+            gwfmodelname2=gwf_model_names[1],
+            nexg=len(exchng_conn),
+            exchangedata=exchng_conn,
+            pname='EXG-GWT',
+            filename=f"{gwt_model_names[0]}-{gwt_model_names[1]}.exg"
+        )
+
+        mvt_filerecord = f"{gwt_model_names[0]}-{gwt_model_names[1]}.gwtgwt.mvt"
+        gwtgwt.mvt.initialize(filename=mvt_filerecord)
 
         return sim
     return None
@@ -2065,7 +2185,7 @@ def plot_results(mf6, idx, ax=None):
         uzt_conc[uzt_conc==0] = np.nan
         fig = plt.figure(figsize=figure_size)
         ax = fig.add_subplot(1, 1, 1)
-        plt.imshow(uzt_conc[360,0,:,:], cmap='jet')
+        plt.imshow(uzt_conc[360, 0, :, :], cmap='jet')
         title = "Layer 1 Unsaturated Concentrations"
         cbar = plt.colorbar(shrink=0.7)
         cbar.ax.set_title('TDS, mg/L', pad=20)
@@ -2677,7 +2797,9 @@ def scenario(idx):
     
     # Build "upstream" version of model
     sim = build_simulation(example_name, elev_adj)
-    
+
+    sim.write_simulation(silent=False)
+
     if success:
         plot_results(sim, idx)
 
