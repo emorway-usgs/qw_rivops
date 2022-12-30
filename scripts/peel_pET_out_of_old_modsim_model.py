@@ -45,6 +45,7 @@ with open(fpth, 'r') as f:
                 print('Finished with pET, ' + dt[-1])
 
 
+print('Error msg will follow the above for loop, no biggie, it is expected.')
 pET = np.array(pET)
 
 # Look at new ibound arrays since their shape has changed slightly
